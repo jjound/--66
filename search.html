@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ผลลัพธ์การเดินทาง | ขนส่งสาธารณะทั่วไทย</title>
+    <link rel="stylesheet" href="index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="search-results-page">
+
+    <header class="search-header">
+        <a href="index.html" class="nav-brand">TripNOcar</a>
+        <form class="search-form-compact" action="Search.html" method="GET">
+            <div class="compact-input-group">
+                <i class="fas fa-map-marker-alt"></i>
+                <input type="text" id="from-input-compact" name="from" placeholder="ต้นทาง"> 
+            </div>
+            <div class="compact-swap" onclick="swapCompactLocations()">
+                <i class="fas fa-exchange-alt"></i>
+            </div>
+            <div class="compact-input-group">
+                <i class="fas fa-map-marker-alt"></i>
+                <input type="text" id="to-input-compact" name="to" placeholder="ปลายทาง">
+            </div>
+            <button type="submit" class="compact-search-btn"><i class="fas fa-search"></i></button>
+        </form>
+        <div class="search-nav-menu">
+            <a href="#" class="active-tab">ขนส่ง</a>
+        </div>
+    </header>
+
+    <main class="results-container">
+        
+        <div class="results-sidebar">
+            
+            <nav class="filter-nav-menu">
+                <button class="filter-btn active-filter" data-filter="All">
+                    <i class="fas fa-grip-lines"></i> ทั้งหมด (<span id="count-All">0</span>)
+                </button>
+                <button class="filter-btn" data-filter="BusVan">
+                    <i class="fas fa-bus-alt"></i> รถบัส/รถตู้ (<span id="count-BusVan">0</span>)
+                </button>
+                <button class="filter-btn" data-filter="Train">
+                    <i class="fas fa-train"></i> รถไฟ (<span id="count-Train">0</span>)
+                </button>
+                <button class="filter-btn" data-filter="Plane">
+                    <i class="fas fa-plane"></i> เครื่องบิน (<span id="count-Plane">0</span>)
+                </button>
+                <button class="filter-btn" data-filter="TaxiCar">
+                    <i class="fas fa-taxi"></i> แท็กซี่/เหมา (<span id="count-TaxiCar">0</span>)
+                </button>
+                <button class="filter-btn" data-filter="Ferry">
+                    <i class="fas fa-ship"></i> เรือ/เฟอร์รี่ (<span id="count-Ferry">0</span>)
+                </button>
+            </nav>
+
+            <div class="results-section">
+                <h2 class="results-title" id="results-heading">... ตัวเลือกการเดินทางจาก ... ไป ...</h2>
+                <div id="travel-options-list">
+                    <p style="text-align: center; color: #999;">กำลังค้นหาข้อมูล...</p>
+                </div>
+            </div>
+            
+            </div>
+
+        <div class="map-main">
+            <iframe
+                id="google-map-iframe"
+                width="100%"
+                height="100%"
+                style="border:0;"
+                loading="lazy"
+                allowfullscreen
+                referrerpolicy="no-referrer-when-downgrade"
+                src=""> 
+            </iframe>
+        </div>
+    </main>
+
+    <script>
+        
+        // ** ฟังก์ชัน Swap สำหรับหน้าผลลัพธ์ **
+        function swapCompactLocations() {
+            const fromInput = document.getElementById('from-input-compact');
+            const toInput = document.getElementById('to-input-compact');
+            const tempValue = fromInput.value;
+            fromInput.value = toInput.value;
+            toInput.value = tempValue;
+            document.querySelector('.search-form-compact').submit();
+        }
+        
+        // ** NEW: ฟังก์ชันหลักในการเปลี่ยนแผนที่เมื่อคลิกตัวเลือก **
+        function updateMapForOption(mapUrl, clickedElement) {
+            const mapIframe = document.getElementById('google-map-iframe');
+            
+            // 1. เปลี่ยน URL ของ Iframe
+            mapIframe.src = mapUrl;
+
+            // 2. จัดการ Class สำหรับไฮไลท์
+            document.querySelectorAll('.travel-option').forEach(opt => {
+                opt.classList.remove('active-route'); // ลบคลาส Active เดิมทั้งหมด
+            });
+            clickedElement.classList.add('active-route'); // เพิ่มคลาส Active ให้ตัวที่ถูกคลิก
+        }
+
+        
+        // **********************************************
+        // ********** MOCK DATA BASE (ฐานข้อมูลจำลอง - ฉบับสมบูรณ์) **********
+        // **********************************************
+        const travelData = {
+            // ----------------------------------------------------
+            // เส้นทาง: กรุงเทพ -> เชียงใหม่ (24 ตัวเลือก)
+            // ----------------------------------------------------
+            "กรุงเทพ_เชียงใหม่": [
+                { type: "BusVan", icon: "fas fa-bus-alt", title: "รถโดยสาร (บขส.) VIP 32 ที่นั่ง (รอบดึก)", best: true, price: "THB 850", duration: "9 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: หมอชิต 2, จุดลง: สถานีขนส่งอาเขต 3", time: "21:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-หมอชิต2-ไป-อาเขต3-ที่นี่-Bus1" },
+                { type: "BusVan", icon: "fas fa-bus", title: "นครชัยแอร์ Gold Class (รอบค่ำ)", best: false, price: "THB 799", duration: "9 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีเดินรถนครชัยแอร์, จุดลง: สถานีขนส่งอาเขต 3", time: "22:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-นครชัยแอร์-ไป-อาเขต3-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus-alt", title: "สมบัติทัวร์ (รอบบ่าย)", best: false, price: "THB 650", duration: "10 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: วิภาวดีรังสิต, จุดลง: สถานีขนส่งอาเขต 3", time: "14:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-สมบัติทัวร์-ไป-อาเขต3-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus", title: "รถบัส Express Class (รอบเย็น)", best: false, price: "THB 590", duration: "10 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: หมอชิต 2, จุดลง: สถานีขนส่งอาเขต 2", time: "18:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-หมอชิต2-ไป-อาเขต2-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus-alt", title: "บขส. ชั้น 1 (รอบเช้า)", best: false, price: "THB 550", duration: "10 ชม. 15 นาที", stops: "จุดจอดรถต้นทาง: หมอชิต 2, จุดลง: สถานีขนส่งอาเขต 3", time: "07:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-หมอชิต2-ไป-อาเขต3-ที่นี่-Bus5" },
+                { type: "BusVan", icon: "fas fa-shuttle-van", title: "รถตู้โดยสาร (ต่อรถที่ตาก) - ประหยัด", best: false, price: "THB 490", duration: "12 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: อนุสาวรีย์ชัยฯ, จุดลง: ท่ารถช้างเผือก (ต่อ 2 ครั้ง)", time: "09:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-รถตู้-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus", title: "รถบัสเชิดชัยทัวร์ (รอบบ่าย)", best: false, price: "THB 620", duration: "10 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: หมอชิต 2, จุดลง: สถานีขนส่งอาเขต 3", time: "14:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-หมอชิต2-ไป-อาเขต3-ที่นี่-Bus7" },
+                { type: "BusVan", icon: "fas fa-bus-alt", title: "บขส. Super VIP 24 ที่นั่ง (รอบ 19:30)", best: false, price: "THB 990", duration: "9 ชม. 15 นาที", stops: "จุดจอดรถต้นทาง: หมอชิต 2, จุดลง: สถานีขนส่งอาเขต 3", time: "19:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-หมอชิต2-ไป-อาเขต3-ที่นี่-Bus8" },
+                
+                { type: "Train", icon: "fas fa-train", title: "รถไฟด่วนพิเศษ (ตู้นอน) ขบวน 9 (รอบค่ำ)", best: false, price: "THB 1,150", duration: "12 ชม. 15 นาที", stops: "จุดจอดรถต้นทาง: สถานีกลางกรุงเทพอภิวัฒน์, จุดลง: สถานีรถไฟเชียงใหม่", time: "18:10", mapUrl: "ใส่-URL-ของ-เส้นทาง-รถไฟ-กทม-ไป-ชม-Train1-ที่นี่" },
+                { type: "Train", icon: "fas fa-train", title: "รถไฟด่วน ขบวน 51 (ตู้แอร์) - รอบบ่าย", best: false, price: "THB 650", duration: "14 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีกลางกรุงเทพอภิวัฒน์, จุดลง: สถานีรถไฟเชียงใหม่", time: "15:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-รถไฟ-กทม-ไป-ชม-Train2-ที่นี่" },
+                { type: "Train", icon: "fas fa-train", title: "รถไฟเร็ว ขบวน 109 (ชั้น 3 พัดลม)", best: false, price: "THB 250", duration: "15 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: สถานีหัวลำโพง, จุดลง: สถานีรถไฟเชียงใหม่", time: "11:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-รถไฟ-กทม-ไป-ชม-Train3-ที่นี่" },
+                { type: "Train", icon: "fas fa-train", title: "รถไฟด่วนพิเศษ ขบวน 7 (รอบเช้า)", best: false, price: "THB 1,500", duration: "11 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: สถานีกลางกรุงเทพอภิวัฒน์, จุดลง: สถานีรถไฟเชียงใหม่", time: "08:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-รถไฟ-กทม-ไป-ชม-Train4-ที่นี่" },
+                
+                { type: "Plane", icon: "fas fa-plane", title: "Thai Vietjet (ดอนเมือง) - รอบเช้า", best: false, price: "THB 1,200", duration: "1 ชม. 10 นาที", stops: "จุดจอดรถต้นทาง: สนามบินดอนเมือง, จุดลง: สนามบินเชียงใหม่", time: "07:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-เครื่องบิน-กทม-ไป-ชม-Plane1-ที่นี่" },
+                { type: "Plane", icon: "fas fa-plane", title: "AirAsia (ดอนเมือง) - รอบเที่ยง", best: false, price: "THB 1,590", duration: "1 ชม. 15 นาที", stops: "จุดจอดรถต้นทาง: สนามบินดอนเมือง, จุดลง: สนามบินเชียงใหม่", time: "12:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-เครื่องบิน-กทม-ไป-ชม-Plane2-ที่นี่" },
+                { type: "Plane", icon: "fas fa-plane", title: "Thai Airways (สุวรรณภูมิ) - รอบเย็น", best: false, price: "THB 2,500", duration: "1 ชม. 05 นาที", stops: "จุดจอดรถต้นทาง: สนามบินสุวรรณภูมิ, จุดลง: สนามบินเชียงใหม่", time: "18:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-เครื่องบิน-กทม-ไป-ชม-Plane3-ที่นี่" },
+                { type: "Plane", icon: "fas fa-plane", title: "Nok Air (ดอนเมือง) - รอบค่ำ", best: false, price: "THB 1,350", duration: "1 ชม. 20 นาที", stops: "จุดจอดรถต้นทาง: สนามบินดอนเมือง, จุดลง: สนามบินเชียงใหม่", time: "20:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-เครื่องบิน-กทม-ไป-ชม-Plane4-ที่นี่" },
+                
+                { type: "TaxiCar", icon: "fas fa-taxi", title: "แท็กซี่เหมา (ส่งถึงที่) - 4 ที่นั่ง", best: false, price: "THB 8,500", duration: "8 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: รับจากทุกจุดใน กทม., จุดลง: ส่งถึงที่พักในเชียงใหม่", time: "07:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-แท็กซี่-กทม-ไป-ชม-Taxi1-ที่นี่" },
+                { type: "TaxiCar", icon: "fas fa-car", title: "รถตู้เหมาส่วนตัว (9 ที่นั่ง) - VIP", best: false, price: "THB 11,000", duration: "9 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: รับจากทุกจุดใน กทม., จุดลง: ส่งถึงที่พักในเชียงใหม่", time: "09:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-แท็กซี่-กทม-ไป-ชม-Taxi2-ที่นี่" },
+                { type: "TaxiCar", icon: "fas fa-car", title: "รถลีมูซีนส่วนตัว - แพงสุด/เร็วสุด", best: false, price: "THB 15,000", duration: "8 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: รับจากทุกจุดใน กทม., จุดลง: ส่งถึงที่พักในเชียงใหม่", time: "06:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-แท็กซี่-กทม-ไป-ชม-Taxi3-ที่นี่" },
+                { type: "TaxiCar", icon: "fas fa-taxi", title: "รถเช่าพร้อมคนขับ (10 ชั่วโมง)", best: false, price: "THB 9,500", duration: "8 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: รับจากทุกจุดใน กทม., จุดลง: ส่งถึงที่พักในเชียงใหม่", time: "10:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-แท็กซี่-กทม-ไป-ชม-Taxi4-ที่นี่" },
+
+            ],
+            // ----------------------------------------------------
+            // เส้นทาง: เชียงใหม่ -> กรุงเทพ (20 ตัวเลือก)
+            // ----------------------------------------------------
+            "เชียงใหม่_กรุงเทพ": [
+                { type: "BusVan", icon: "fas fa-bus-alt", title: "รถโดยสาร (บขส.) VIP 32 ที่นั่ง (รอบดึก)", best: true, price: "THB 850", duration: "9 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งอาเขต 3, จุดลง: หมอชิต 2", time: "21:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-ชม-ไป-กทม-Bus1-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus", title: "นครชัยแอร์ Gold Class (รอบค่ำ)", best: false, price: "THB 799", duration: "9 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งอาเขต 3, จุดลง: สถานีเดินรถนครชัยแอร์", time: "22:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-ชม-ไป-กทม-Bus2-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus-alt", title: "สมบัติทัวร์ (รอบบ่าย)", best: false, price: "THB 650", duration: "10 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งอาเขต 3, จุดลง: วิภาวดีรังสิต", time: "14:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-ชม-ไป-กทม-Bus3-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus", title: "รถบัส Express Class (รอบเย็น)", best: false, price: "THB 590", duration: "10 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งอาเขต 2, จุดลง: หมอชิต 2", time: "18:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-ชม-ไป-กทม-Bus4-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus-alt", title: "บขส. ชั้น 1 (รอบเช้า)", best: false, price: "THB 550", duration: "10 ชม. 15 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งอาเขต 3, จุดลง: หมอชิต 2", time: "07:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-ชม-ไป-กทม-Bus5-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-shuttle-van", title: "รถตู้โดยสาร (ต่อรถที่ตาก) - ประหยัด", best: false, price: "THB 490", duration: "12 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: ท่ารถช้างเผือก, จุดลง: อนุสาวรีย์ชัยฯ (ต่อ 2 ครั้ง)", time: "09:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-รถตู้-ชม-ไป-กทม-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus", title: "รถบัสเชิดชัยทัวร์ (รอบบ่าย)", best: false, price: "THB 620", duration: "10 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งอาเขต 3, จุดลง: หมอชิต 2", time: "14:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-ชม-ไป-กทม-Bus7-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus-alt", title: "บขส. Super VIP 24 ที่นั่ง (รอบ 19:30)", best: false, price: "THB 990", duration: "9 ชม. 15 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งอาเขต 3, จุดลง: หมอชิต 2", time: "19:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-ชม-ไป-กทม-Bus8-ที่นี่" },
+
+                { type: "Train", icon: "fas fa-train", title: "รถไฟด่วนพิเศษ (ตู้นอน) ขบวน 10 (รอบค่ำ)", best: false, price: "THB 1,150", duration: "12 ชม. 15 นาที", stops: "จุดจอดรถต้นทาง: สถานีรถไฟเชียงใหม่, จุดลง: สถานีกลางกรุงเทพอภิวัฒน์", time: "18:10", mapUrl: "ใส่-URL-ของ-เส้นทาง-ชม-ไป-กทม-Train1-ที่นี่" },
+                { type: "Train", icon: "fas fa-train", title: "รถไฟด่วน ขบวน 52 (ตู้แอร์) - รอบบ่าย", best: false, price: "THB 650", duration: "14 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีรถไฟเชียงใหม่, จุดลง: สถานีกลางกรุงเทพอภิวัฒน์", time: "15:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-ชม-ไป-กทม-Train2-ที่นี่" },
+
+                { type: "Plane", icon: "fas fa-plane", title: "Thai Vietjet (ดอนเมือง) - รอบเช้า", best: false, price: "THB 1,200", duration: "1 ชม. 10 นาที", stops: "จุดจอดรถต้นทาง: สนามบินเชียงใหม่, จุดลง: สนามบินดอนเมือง", time: "07:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-ชม-ไป-กทม-Plane1-ที่นี่" },
+                { type: "Plane", icon: "fas fa-plane", title: "AirAsia (ดอนเมือง) - รอบเที่ยง", best: false, price: "THB 1,590", duration: "1 ชม. 15 นาที", stops: "จุดจอดรถต้นทาง: สนามบินเชียงใหม่, จุดลง: สนามบินดอนเมือง", time: "12:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-ชม-ไป-กทม-Plane2-ที่นี่" },
+                
+                { type: "TaxiCar", icon: "fas fa-taxi", title: "แท็กซี่เหมา (ส่งถึงที่) - 4 ที่นั่ง", best: false, price: "THB 8,500", duration: "8 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: รับจากที่พักในเชียงใหม่, จุดลง: ส่งถึงที่พักใน กทม.", time: "07:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-ชม-ไป-กทม-Taxi1-ที่นี่" },
+                { type: "TaxiCar", icon: "fas fa-car", title: "รถตู้เหมาส่วนตัว (9 ที่นั่ง) - VIP", best: false, price: "THB 11,000", duration: "9 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: รับจากที่พักในเชียงใหม่, จุดลง: ส่งถึงที่พักใน กทม.", time: "09:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-ชม-ไป-กทม-Taxi2-ที่นี่" },
+            ],
+            // ----------------------------------------------------
+            // เส้นทาง: กรุงเทพ -> พัทยา
+            // ----------------------------------------------------
+            "กรุงเทพ_พัทยา": [
+                 { type: "BusVan", icon: "fas fa-bus-alt", title: "รถโดยสาร (เอกมัย-พัทยา) รอบเช้า", best: true, price: "THB 130", duration: "2 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งเอกมัย, จุดลง: สถานีขนส่งพัทยา", time: "07:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-เอกมัย-ไป-พัทยา-ที่นี่" },
+                 { type: "BusVan", icon: "fas fa-bus", title: "รถโดยสาร (หมอชิต 2-พัทยา) รอบบ่าย", best: false, price: "THB 150", duration: "3 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งหมอชิต 2, จุดลง: สถานีขนส่งพัทยา", time: "14:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-หมอชิต-ไป-พัทยา-ที่นี่" },
+                 { type: "BusVan", icon: "fas fa-bus-alt", title: "รถตู้ (อนุสาวรีย์ชัยฯ - พัทยา) รอบเช้า", best: false, price: "THB 180", duration: "2 ชม. 15 นาที", stops: "จุดจอดรถต้นทาง: อนุสาวรีย์ชัยฯ, จุดลง: ชายหาดพัทยา", time: "08:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-รถตู้-อนุสาวรีย์-ไป-พัทยา-ที่นี่" },
+                 { type: "BusVan", icon: "fas fa-bus", title: "รถโดยสาร (สุวรรณภูมิ-พัทยา) รอบเย็น", best: false, price: "THB 130", duration: "1 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: สนามบินสุวรรณภูมิ, จุดลง: โรงแรมในพัทยา", time: "18:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-สุวรรณภูมิ-ไป-พัทยา-ที่นี่" },
+                 { type: "Train", icon: "fas fa-train", title: "รถไฟธรรมดา (หัวลำโพง-พัทยา) รอบเช้า", best: false, price: "THB 40", duration: "4 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีหัวลำโพง, จุดลง: สถานีรถไฟพัทยา", time: "06:55", mapUrl: "ใส่-URL-ของ-เส้นทาง-รถไฟ-หัวลำโพง-ไป-พัทยา-ที่นี่" },
+                 { type: "TaxiCar", icon: "fas fa-taxi", title: "แท็กซี่เหมา (ส่งถึงที่) - ราคาประมาณ", best: false, price: "THB 1,500", duration: "2 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: รับจากทุกจุด, จุดลง: ส่งถึงที่พักในพัทยา", time: "10:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-แท็กซี่-กทม-ไป-พัทยา-ที่นี่" },
+                 { type: "TaxiCar", icon: "fas fa-car", title: "รถตู้เหมาส่วนตัว (7 ที่นั่ง)", best: false, price: "THB 2,000", duration: "1 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: รับจากบ้าน, จุดลง: ส่งถึงที่พักในพัทยา", time: "15:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-รถตู้เหมา-ไป-พัทยา-ที่นี่" },
+                 { type: "BusVan", icon: "fas fa-bus-alt", title: "รถโดยสาร (เอกมัย-พัทยา) รอบค่ำ", best: false, price: "THB 130", duration: "2 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งเอกมัย, จุดลง: สถานีขนส่งพัทยา", time: "20:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-เอกมัย-ไป-พัทยา-Bus3-ที่นี่" },
+            ],
+            // ----------------------------------------------------
+            // เส้นทาง: พัทยา -> กรุงเทพ (ย้อนกลับ)
+            // ----------------------------------------------------
+            "พัทยา_กรุงเทพ": [
+                 { type: "BusVan", icon: "fas fa-bus-alt", title: "รถโดยสาร (พัทยา-เอกมัย) รอบเย็น", best: true, price: "THB 130", duration: "2 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งพัทยา, จุดลง: สถานีขนส่งเอกมัย", time: "17:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-พัทยา-ไป-เอกมัย-ที่นี่" },
+                 { type: "BusVan", icon: "fas fa-bus", title: "รถโดยสาร (พัทยา-หมอชิต 2) รอบบ่าย", best: false, price: "THB 150", duration: "3 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งพัทยา, จุดลง: สถานีขนส่งหมอชิต 2", time: "12:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-พัทยา-ไป-หมอชิต-ที่นี่" },
+                 { type: "BusVan", icon: "fas fa-bus-alt", title: "รถตู้ (พัทยา - อนุสาวรีย์ชัยฯ) รอบเย็น", best: false, price: "THB 180", duration: "2 ชม. 15 นาที", stops: "จุดจอดรถต้นทาง: ชายหาดพัทยา, จุดลง: อนุสาวรีย์ชัยฯ", time: "15:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-รถตู้-พัทยา-ไป-อนุสาวรีย์-ที่นี่" },
+                 { type: "BusVan", icon: "fas fa-bus", title: "รถโดยสาร (พัทยา-สุวรรณภูมิ) รอบเช้า", best: false, price: "THB 130", duration: "1 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: โรงแรมในพัทยา, จุดลง: สนามบินสุวรรณภูมิ", time: "09:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-พัทยา-ไป-สุวรรณภูมิ-ที่นี่" },
+                 { type: "Train", icon: "fas fa-train", title: "รถไฟธรรมดา (พัทยา-หัวลำโพง) รอบเย็น", best: false, price: "THB 40", duration: "4 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีรถไฟพัทยา, จุดลง: สถานีหัวลำโพง", time: "14:20", mapUrl: "ใส่-URL-ของ-เส้นทาง-รถไฟ-พัทยา-ไป-หัวลำโพง-ที่นี่" },
+                 { type: "TaxiCar", icon: "fas fa-taxi", title: "แท็กซี่เหมา (ส่งถึงที่) - ราคาประมาณ", best: false, price: "THB 1,500", duration: "2 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: รับจากที่พักในพัทยา, จุดลง: ส่งถึงที่พักใน กทม.", time: "10:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-แท็กซี่-พัทยา-ไป-กทม-ที่นี่" },
+                 { type: "TaxiCar", icon: "fas fa-car", title: "รถตู้เหมาส่วนตัว (7 ที่นั่ง)", best: false, price: "THB 2,000", duration: "1 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: รับจากที่พักในพัทยา, จุดลง: ส่งถึงที่พักใน กทม.", time: "15:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-รถตู้เหมา-พัทยา-ไป-กทม-ที่นี่" },
+                 { type: "BusVan", icon: "fas fa-bus-alt", title: "รถโดยสาร (พัทยา-เอกมัย) รอบเช้า", best: false, price: "THB 130", duration: "2 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งพัทยา, จุดลง: สถานีขนส่งเอกมัย", time: "09:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-พัทยา-ไป-เอกมัย-Bus3-ที่นี่" },
+            ],
+            // ----------------------------------------------------
+            // เส้นทาง: กรุงเทพ -> ภูเก็ต (8 ตัวเลือก)
+            // ----------------------------------------------------
+            "กรุงเทพ_ภูเก็ต": [
+                { type: "Plane", icon: "fas fa-plane", title: "Thai Vietjet (BKK) - รอบเช้า", best: true, price: "THB 1,800", duration: "1 ชม. 25 นาที", stops: "จุดจอดรถต้นทาง: สนามบินสุวรรณภูมิ, จุดลง: สนามบินภูเก็ต", time: "07:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-ภูเก็ต-Plane1-ที่นี่" },
+                { type: "Plane", icon: "fas fa-plane", title: "AirAsia (DMK) - รอบเที่ยง", best: false, price: "THB 1,550", duration: "1 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: สนามบินดอนเมือง, จุดลง: สนามบินภูเก็ต", time: "12:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-ภูเก็ต-Plane2-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus-alt", title: "รถโดยสาร บขส. VIP (รอบค่ำ)", best: false, price: "THB 1,100", duration: "13 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งสายใต้ใหม่, จุดลง: สถานีขนส่งภูเก็ต 2", time: "19:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-ภูเก็ต-Bus1-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus", title: "บริษัท ภูเก็ต เซ็นทรัล - 38 ที่นั่ง", best: false, price: "THB 950", duration: "14 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งสายใต้ใหม่, จุดลง: สถานีขนส่งภูเก็ต 2", time: "17:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-ภูเก็ต-Bus2-ที่นี่" },
+                { type: "Plane", icon: "fas fa-plane", title: "Bangkok Airways (BKK) - รอบเย็น", best: false, price: "THB 2,500", duration: "1 ชม. 20 นาที", stops: "จุดจอดรถต้นทาง: สนามบินสุวรรณภูมิ, จุดลง: สนามบินภูเก็ต", time: "18:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-ภูเก็ต-Plane3-ที่นี่" },
+                { type: "TaxiCar", icon: "fas fa-car", title: "รถตู้เหมา (10 ที่นั่ง) - 2 วัน", best: false, price: "THB 25,000", duration: "12 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: รับจาก กทม., จุดลง: ส่งถึงที่พักในภูเก็ต", time: "06:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-ภูเก็ต-Taxi1-ที่นี่" },
+                { type: "Train", icon: "fas fa-train", title: "รถไฟ (หัวลำโพง-สุราษฎร์ฯ) ต่อรถบัส", best: false, price: "THB 800", duration: "15 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีหัวลำโพง, จุดลง: สถานีสุราษฎร์ฯ ต่อรถบัสไปภูเก็ต", time: "16:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-รถไฟ-กทม-ไป-สุราษฎร์ฯ-ต่อภูเก็ต-ที่นี่" },
+                { type: "Plane", icon: "fas fa-plane", title: "Nok Air (DMK) - ราคาประหยัด", best: false, price: "THB 1,450", duration: "1 ชม. 35 นาที", stops: "จุดจอดรถต้นทาง: สนามบินดอนเมือง, จุดลง: สนามบินภูเก็ต", time: "15:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-ภูเก็ต-Plane4-ที่นี่" },
+            ],
+            // ----------------------------------------------------
+            // เส้นทาง: ภูเก็ต -> กรุงเทพ (8 ตัวเลือก)
+            // ----------------------------------------------------
+            "ภูเก็ต_กรุงเทพ": [
+                { type: "Plane", icon: "fas fa-plane", title: "Thai Vietjet (HKT) - รอบเช้า", best: true, price: "THB 1,800", duration: "1 ชม. 25 นาที", stops: "จุดจอดรถต้นทาง: สนามบินภูเก็ต, จุดลง: สนามบินสุวรรณภูมิ", time: "08:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-ภูเก็ต-ไป-กทม-Plane1-ที่นี่" },
+                { type: "Plane", icon: "fas fa-plane", title: "AirAsia (HKT) - รอบเที่ยง", best: false, price: "THB 1,550", duration: "1 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: สนามบินภูเก็ต, จุดลง: สนามบินดอนเมือง", time: "13:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-ภูเก็ต-ไป-กทม-Plane2-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus-alt", title: "รถโดยสาร บขส. VIP (รอบค่ำ)", best: false, price: "THB 1,100", duration: "13 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งภูเก็ต 2, จุดลง: สถานีขนส่งสายใต้ใหม่", time: "19:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-ภูเก็ต-ไป-กทม-Bus1-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus", title: "บริษัท ภูเก็ต เซ็นทรัล - 38 ที่นั่ง", best: false, price: "THB 950", duration: "14 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งภูเก็ต 2, จุดลง: สถานีขนส่งสายใต้ใหม่", time: "17:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-ภูเก็ต-ไป-กทม-Bus2-ที่นี่" },
+                { type: "Plane", icon: "fas fa-plane", title: "Bangkok Airways (HKT) - รอบเย็น", best: false, price: "THB 2,500", duration: "1 ชม. 20 นาที", stops: "จุดจอดรถต้นทาง: สนามบินภูเก็ต, จุดลง: สนามบินสุวรรณภูมิ", time: "18:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-ภูเก็ต-ไป-กทม-Plane3-ที่นี่" },
+                { type: "TaxiCar", icon: "fas fa-car", title: "รถตู้เหมา (10 ที่นั่ง) - 2 วัน", best: false, price: "THB 25,000", duration: "12 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: รับจากที่พักในภูเก็ต, จุดลง: ส่งถึง กทม.", time: "06:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-ภูเก็ต-ไป-กทม-Taxi1-ที่นี่" },
+                { type: "Train", icon: "fas fa-train", title: "รถบัส (ภูเก็ต-สุราษฎร์ฯ) ต่อรถไฟ", best: false, price: "THB 800", duration: "15 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งภูเก็ต 2 ต่อรถบัสไปสุราษฎร์ฯ", time: "14:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-รถบัส-ไป-สุราษฎร์ฯ-ต่อรถไฟ-ที่นี่" },
+                { type: "Plane", icon: "fas fa-plane", title: "Nok Air (HKT) - รอบค่ำ", best: false, price: "THB 1,450", duration: "1 ชม. 35 นาที", stops: "จุดจอดรถต้นทาง: สนามบินภูเก็ต, จุดลง: สนามบินดอนเมือง", time: "20:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-ภูเก็ต-ไป-กทม-Plane4-ที่นี่" },
+            ],
+            // ----------------------------------------------------
+            // เส้นทาง: กรุงเทพ -> สมุทรปราการ (8 ตัวเลือก)
+            // ----------------------------------------------------
+            "กรุงเทพ_สมุทรปราการ": [
+                { type: "Train", icon: "fas fa-train", title: "รถไฟฟ้า BTS (สายสีเขียว)", best: true, price: "THB 25–65", duration: "0 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: BTS สยาม/อโศก, จุดลง: BTS เคหะ (อ.บางพลี)", time: "07:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-สมุทรปราการ-Train1-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus-alt", title: "รถโดยสารประจำทาง (ม.46) สุวรรณภูมิ-ปากน้ำ", best: false, price: "THB 20–50", duration: "1 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: BTS อ่อนนุช, จุดลง: อิมพีเรียลสำโรง (อ.เมือง)", time: "06:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-สมุทรปราการ-Bus1-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus", title: "รถเมล์ธรรมดา (รอบเย็น) - ประหยัด", best: false, price: "THB 8–20", duration: "1 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: หัวลำโพง, จุดลง: ตลาดปากน้ำ (อ.เมือง)", time: "17:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-สมุทรปราการ-Bus3-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-shuttle-van", title: "รถตู้ ต.127 (บางนา-บางปะกง)", best: false, price: "THB 35–60", duration: "0 ชม. 40 นาที", stops: "จุดจอดรถต้นทาง: BTS บางนา, จุดลง: โลตัสบางพลี", time: "11:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-สมุทรปราการ-Bus4-ที่นี่" },
+                { type: "Train", icon: "fas fa-train", title: "รถไฟฟ้า BTS (สายสีเขียว) - รอบเย็น", best: false, price: "THB 25–65", duration: "0 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: BTS สยาม/อโศก, จุดลง: BTS เคหะ (อ.บางพลี)", time: "18:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-สมุทรปราการ-Train2-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus-alt", title: "รถโดยสารประจำทาง (ม.46) รอบดึก", best: false, price: "THB 20–50", duration: "1 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: BTS อ่อนนุช, จุดลง: อิมพีเรียลสำโรง (อ.เมือง)", time: "22:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-สมุทรปราการ-Bus6-ที่นี่" },
+                { type: "TaxiCar", icon: "fas fa-taxi", title: "แท็กซี่มิเตอร์ (ประมาณการ)", best: false, price: "THB 300–450", duration: "0 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: อโศก, จุดลง: อ.เมืองสมุทรปราการ", time: "10:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-สมุทรปราการ-Taxi1-ที่นี่" },
+                { type: "TaxiCar", icon: "fas fa-car", title: "รถตู้เหมา (ราคาคงที่)", best: false, price: "THB 500", duration: "0 ชม. 40 นาที", stops: "จุดจอดรถต้นทาง: รับจากบ้าน, จุดลง: ส่งถึงที่พัก", time: "14:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-สมุทรปราการ-Taxi2-ที่นี่" },
+            ],
+            // ----------------------------------------------------
+            // เส้นทาง: สมุทรปราการ -> กรุงเทพ (8 ตัวเลือก)
+            // ----------------------------------------------------
+            "สมุทรปราการ_กรุงเทพ": [
+                { type: "Train", icon: "fas fa-train", title: "รถไฟฟ้า BTS (สายสีเขียว) - รอบเช้า", best: true, price: "THB 25–65", duration: "0 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: BTS เคหะ (อ.บางพลี), จุดลง: BTS สยาม/อโศก", time: "06:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-สมุทรปราการ-ไป-กทม-Train1-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus-alt", title: "รถโดยสารประจำทาง (ม.46) ปากน้ำ-สุขุมวิท", best: false, price: "THB 20–50", duration: "1 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: อิมพีเรียลสำโรง (อ.เมือง), จุดลง: BTS อ่อนนุช", time: "07:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-สมุทรปราการ-ไป-กทม-Bus1-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus", title: "รถเมล์ธรรมดา (รอบเย็น) - ประหยัด", best: false, price: "THB 8–20", duration: "1 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: ตลาดปากน้ำ (อ.เมือง), จุดลง: หัวลำโพง", time: "17:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-สมุทรปราการ-ไป-กทม-Bus3-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-shuttle-van", title: "รถตู้ ต.127 (บางปะกง-บางนา)", best: false, price: "THB 35–60", duration: "0 ชม. 40 นาที", stops: "จุดจอดรถต้นทาง: โลตัสบางพลี, จุดลง: BTS บางนา", time: "09:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-สมุทรปราการ-ไป-กทม-Bus4-ที่นี่" },
+                { type: "Train", icon: "fas fa-train", title: "รถไฟฟ้า BTS (สายสีเขียว) - รอบเที่ยง", best: false, price: "THB 25–65", duration: "0 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: BTS เคหะ (อ.บางพลี), จุดลง: BTS สยาม/อโศก", time: "12:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-สมุทรปราการ-ไป-กทม-Train2-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus-alt", title: "รถโดยสารประจำทาง (ม.46) รอบดึก", best: false, price: "THB 20–50", duration: "1 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: อิมพีเรียลสำโรง (อ.เมือง), จุดลง: BTS อ่อนนุช", time: "23:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-สมุทรปราการ-ไป-กทม-Bus6-ที่นี่" },
+                { type: "TaxiCar", icon: "fas fa-taxi", title: "แท็กซี่มิเตอร์ (ประมาณการ)", best: false, price: "THB 300–450", duration: "0 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: อ.เมืองสมุทรปราการ, จุดลง: อโศก", time: "10:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-สมุทรปราการ-ไป-กทม-Taxi1-ที่นี่" },
+                { type: "TaxiCar", icon: "fas fa-car", title: "รถตู้เหมา (ราคาคงที่)", best: false, price: "THB 500", duration: "0 ชม. 40 นาที", stops: "จุดจอดรถต้นทาง: ส่งถึงที่พัก, จุดลง: รับจากบ้าน", time: "14:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-สมุทรปราการ-ไป-กทม-Taxi2-ที่นี่" },
+            ],
+            // ----------------------------------------------------
+            // เส้นทาง: พัทยา -> ภูเก็ต (8 ตัวเลือก)
+            // ----------------------------------------------------
+            "พัทยา_ภูเก็ต": [
+                { type: "Plane", icon: "fas fa-plane", title: "เครื่องบิน (UTP) 14:00", operator: "Bangkok Airways", best: true, price: "THB 2,100", duration: "1 ชม. 35 นาที", stops: "จุดจอดรถต้นทาง: สนามบินอู่ตะเภา, จุดลง: สนามบินภูเก็ต", time: "14:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-พัทยา-ไป-ภูเก็ต-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-route", title: "รถบัส -> ต่อเครื่องบิน", operator: "รถบัส+AirAsia", best: false, price: "THB 1,800", duration: "6 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งพัทยา, จุดลง: สนามบินดอนเมือง (ต่อเครื่อง)", time: "06:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-พัทยา-ไป-กทม-ต่อเครื่อง-ที่นี่" },
+                { type: "Plane", icon: "fas fa-plane", title: "Thai Vietjet (UTP) - รอบเช้า", best: false, price: "THB 1,990", duration: "1 ชม. 40 นาที", stops: "จุดจอดรถต้นทาง: สนามบินอู่ตะเภา, จุดลง: สนามบินภูเก็ต", time: "08:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-พัทยา-ไป-ภูเก็ต-Plane2-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus-alt", title: "รถบัส (พัทยา-หาดใหญ่) ต่อรถไฟ", best: false, price: "THB 1,500", duration: "16 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งพัทยา, จุดลง: สุราษฎร์ฯ ต่อรถไฟ/บัสไปภูเก็ต", time: "10:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-พัทยา-ไป-สุราษฎร์ฯ-ที่นี่" },
+                { type: "TaxiCar", icon: "fas fa-car", title: "รถตู้เหมา (พัทยา-ภูเก็ต) 2 วัน", best: false, price: "THB 22,000", duration: "12 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: รับจากที่พักในพัทยา, จุดลง: ส่งถึงที่พักในภูเก็ต", time: "07:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-พัทยา-ไป-ภูเก็ต-Taxi1-ที่นี่" },
+                { type: "Plane", icon: "fas fa-plane", title: "Nok Air (UTP) - รอบบ่าย", best: false, price: "THB 2,050", duration: "1 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: สนามบินอู่ตะเภา, จุดลง: สนามบินภูเก็ต", time: "16:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-พัทยา-ไป-ภูเก็ต-Plane3-ที่นี่" },
+                { type: "Ferry", icon: "fas fa-ship", title: "รถบัส (พัทยา-ชุมพร) ต่อเรือ", best: false, price: "THB 1,300", duration: "14 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งพัทยา, จุดลง: ชุมพร ต่อเรือเฟอร์รี่", time: "20:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-พัทยา-ไป-ชุมพร-ต่อเรือ-ที่นี่" },
+                { type: "Plane", icon: "fas fa-plane", title: "AirAsia (UTP) - รอบเย็น", best: false, price: "THB 1,750", duration: "1 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: สนามบินอู่ตะเภา, จุดลง: สนามบินภูเก็ต", time: "19:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-พัทยา-ไป-ภูเก็ต-Plane4-ที่นี่" },
+            ],
+            // ----------------------------------------------------
+            // เส้นทาง: ภูเก็ต -> พัทยา (8 ตัวเลือก)
+            // ----------------------------------------------------
+            "ภูเก็ต_พัทยา": [
+                { type: "Plane", icon: "fas fa-plane", title: "เครื่องบิน (HKT) 14:00", operator: "Bangkok Airways", best: true, price: "THB 2,100", duration: "1 ชม. 35 นาที", stops: "จุดจอดรถต้นทาง: สนามบินภูเก็ต, จุดลง: สนามบินอู่ตะเภา", time: "14:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-ภูเก็ต-ไป-พัทยา-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-route", title: "รถบัส -> ต่อเครื่องบิน", operator: "รถบัส+AirAsia", best: false, price: "THB 1,800", duration: "6 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สนามบินภูเก็ต, จุดลง: สนามบินดอนเมือง (ต่อรถบัส)", time: "06:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-ภูเก็ต-ไป-กทม-ต่อเครื่อง-ที่นี่" },
+                { type: "Plane", icon: "fas fa-plane", title: "Thai Vietjet (HKT) - รอบเช้า", best: false, price: "THB 1,990", duration: "1 ชม. 40 นาที", stops: "จุดจอดรถต้นทาง: สนามบินภูเก็ต, จุดลง: สนามบินอู่ตะเภา", time: "08:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-ภูเก็ต-ไป-พัทยา-Plane2-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus-alt", title: "รถบัส (หาดใหญ่-พัทยา) ต่อรถไฟ", best: false, price: "THB 1,500", duration: "16 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สุราษฎร์ฯ ต่อรถบัสไปพัทยา", time: "10:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-ภูเก็ต-ไป-สุราษฎร์ฯ-ต่อพัทยา-ที่นี่" },
+                { type: "TaxiCar", icon: "fas fa-car", title: "รถตู้เหมา (ภูเก็ต-พัทยา) 2 วัน", best: false, price: "THB 22,000", duration: "12 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: รับจากที่พักในภูเก็ต, จุดลง: ส่งถึงที่พักในพัทยา", time: "07:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-ภูเก็ต-ไป-พัทยา-Taxi1-ที่นี่" },
+                { type: "Plane", icon: "fas fa-plane", title: "Nok Air (HKT) - รอบบ่าย", best: false, price: "THB 2,050", duration: "1 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: สนามบินภูเก็ต, จุดลง: สนามบินอู่ตะเภา", time: "16:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-ภูเก็ต-ไป-พัทยา-Plane3-ที่นี่" },
+                { type: "Ferry", icon: "fas fa-ship", title: "เรือ (เกาะสมุย) ต่อรถบัส", best: false, price: "THB 1,300", duration: "14 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: ท่าเรือภูเก็ต ต่อเรือและรถบัสไปพัทยา", time: "20:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-ภูเก็ต-ไป-พัทยา-เรือ-ที่นี่" },
+                { type: "Plane", icon: "fas fa-plane", title: "AirAsia (HKT) - รอบเย็น", best: false, price: "THB 1,750", duration: "1 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: สนามบินภูเก็ต, จุดลง: สนามบินอู่ตะเภา", time: "19:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-ภูเก็ต-ไป-พัทยา-Plane4-ที่นี่" },
+            ],
+            // ----------------------------------------------------
+            // เส้นทาง: กรุงเทพ -> พัทยา (8 ตัวเลือก)
+            // ----------------------------------------------------
+            "กรุงเทพ_พัทยา": [
+                 { type: "BusVan", icon: "fas fa-bus-alt", title: "รถโดยสาร (เอกมัย-พัทยา) รอบเช้า", best: true, price: "THB 130", duration: "2 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งเอกมัย, จุดลง: สถานีขนส่งพัทยา", time: "07:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-เอกมัย-ไป-พัทยา-ที่นี่" },
+                 { type: "BusVan", icon: "fas fa-bus", title: "รถโดยสาร (หมอชิต 2-พัทยา) รอบบ่าย", best: false, price: "THB 150", duration: "3 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งหมอชิต 2, จุดลง: สถานีขนส่งพัทยา", time: "14:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-หมอชิต-ไป-พัทยา-ที่นี่" },
+                 { type: "BusVan", icon: "fas fa-bus-alt", title: "รถตู้ (อนุสาวรีย์ชัยฯ - พัทยา) รอบเช้า", best: false, price: "THB 180", duration: "2 ชม. 15 นาที", stops: "จุดจอดรถต้นทาง: อนุสาวรีย์ชัยฯ, จุดลง: ชายหาดพัทยา", time: "08:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-รถตู้-อนุสาวรีย์-ไป-พัทยา-ที่นี่" },
+                 { type: "BusVan", icon: "fas fa-bus", title: "รถโดยสาร (สุวรรณภูมิ-พัทยา) รอบเย็น", best: false, price: "THB 130", duration: "1 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: สนามบินสุวรรณภูมิ, จุดลง: โรงแรมในพัทยา", time: "18:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-สุวรรณภูมิ-ไป-พัทยา-ที่นี่" },
+                 { type: "Train", icon: "fas fa-train", title: "รถไฟธรรมดา (หัวลำโพง-พัทยา) รอบเช้า", best: false, price: "THB 40", duration: "4 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีหัวลำโพง, จุดลง: สถานีรถไฟพัทยา", time: "06:55", mapUrl: "ใส่-URL-ของ-เส้นทาง-รถไฟ-หัวลำโพง-ไป-พัทยา-ที่นี่" },
+                 { type: "TaxiCar", icon: "fas fa-taxi", title: "แท็กซี่เหมา (ส่งถึงที่) - ราคาประมาณ", best: false, price: "THB 1,500", duration: "2 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: รับจากทุกจุด, จุดลง: ส่งถึงที่พักในพัทยา", time: "10:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-แท็กซี่-กทม-ไป-พัทยา-ที่นี่" },
+                 { type: "TaxiCar", icon: "fas fa-car", title: "รถตู้เหมาส่วนตัว (7 ที่นั่ง)", best: false, price: "THB 2,000", duration: "1 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: รับจากบ้าน, จุดลง: ส่งถึงที่พักในพัทยา", time: "15:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-รถตู้เหมา-ไป-พัทยา-ที่นี่" },
+                 { type: "BusVan", icon: "fas fa-bus-alt", title: "รถโดยสาร (เอกมัย-พัทยา) รอบค่ำ", best: false, price: "THB 130", duration: "2 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งเอกมัย, จุดลง: สถานีขนส่งพัทยา", time: "20:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-เอกมัย-ไป-พัทยา-Bus3-ที่นี่" },
+            ],
+            // ----------------------------------------------------
+            // เส้นทาง: พัทยา -> กรุงเทพ (8 ตัวเลือก)
+            // ----------------------------------------------------
+            "พัทยา_กรุงเทพ": [
+                 { type: "BusVan", icon: "fas fa-bus-alt", title: "รถโดยสาร (พัทยา-เอกมัย) รอบเย็น", best: true, price: "THB 130", duration: "2 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งพัทยา, จุดลง: สถานีขนส่งเอกมัย", time: "17:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-พัทยา-ไป-เอกมัย-ที่นี่" },
+                 { type: "BusVan", icon: "fas fa-bus", title: "รถโดยสาร (พัทยา-หมอชิต 2) รอบบ่าย", best: false, price: "THB 150", duration: "3 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งพัทยา, จุดลง: สถานีขนส่งหมอชิต 2", time: "12:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-พัทยา-ไป-หมอชิต-ที่นี่" },
+                 { type: "BusVan", icon: "fas fa-bus-alt", title: "รถตู้ (พัทยา - อนุสาวรีย์ชัยฯ) รอบเย็น", best: false, price: "THB 180", duration: "2 ชม. 15 นาที", stops: "จุดจอดรถต้นทาง: ชายหาดพัทยา, จุดลง: อนุสาวรีย์ชัยฯ", time: "15:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-รถตู้-พัทยา-ไป-อนุสาวรีย์-ที่นี่" },
+                 { type: "BusVan", icon: "fas fa-bus", title: "รถโดยสาร (พัทยา-สุวรรณภูมิ) รอบเช้า", best: false, price: "THB 130", duration: "1 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: โรงแรมในพัทยา, จุดลง: สนามบินสุวรรณภูมิ", time: "09:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-พัทยา-ไป-สุวรรณภูมิ-ที่นี่" },
+                 { type: "Train", icon: "fas fa-train", title: "รถไฟธรรมดา (พัทยา-หัวลำโพง) รอบเย็น", best: false, price: "THB 40", duration: "4 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีรถไฟพัทยา, จุดลง: สถานีหัวลำโพง", time: "14:20", mapUrl: "ใส่-URL-ของ-เส้นทาง-รถไฟ-พัทยา-ไป-หัวลำโพง-ที่นี่" },
+                 { type: "TaxiCar", icon: "fas fa-taxi", title: "แท็กซี่เหมา (ส่งถึงที่) - ราคาประมาณ", best: false, price: "THB 1,500", duration: "2 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: รับจากที่พักในพัทยา, จุดลง: ส่งถึงที่พักใน กทม.", time: "10:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-แท็กซี่-พัทยา-ไป-กทม-ที่นี่" },
+                 { type: "TaxiCar", icon: "fas fa-car", title: "รถตู้เหมาส่วนตัว (7 ที่นั่ง)", best: false, price: "THB 2,000", duration: "1 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: รับจากที่พักในพัทยา, จุดลง: ส่งถึงที่พักใน กทม.", time: "15:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-รถตู้เหมา-พัทยา-ไป-กทม-ที่นี่" },
+                 { type: "BusVan", icon: "fas fa-bus-alt", title: "รถโดยสาร (พัทยา-เอกมัย) รอบเช้า", best: false, price: "THB 130", duration: "2 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งพัทยา, จุดลง: สถานีขนส่งเอกมัย", time: "09:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-พัทยา-ไป-เอกมัย-Bus3-ที่นี่" },
+            ],
+            // ----------------------------------------------------
+            // เส้นทาง: กรุงเทพ -> ภูเก็ต (8 ตัวเลือก)
+            // ----------------------------------------------------
+            "กรุงเทพ_ภูเก็ต": [
+                { type: "Plane", icon: "fas fa-plane", title: "Thai Vietjet (BKK) - รอบเช้า", best: true, price: "THB 1,800", duration: "1 ชม. 25 นาที", stops: "จุดจอดรถต้นทาง: สนามบินสุวรรณภูมิ, จุดลง: สนามบินภูเก็ต", time: "07:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-ภูเก็ต-Plane1-ที่นี่" },
+                { type: "Plane", icon: "fas fa-plane", title: "AirAsia (DMK) - รอบเที่ยง", best: false, price: "THB 1,550", duration: "1 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: สนามบินดอนเมือง, จุดลง: สนามบินภูเก็ต", time: "12:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-ภูเก็ต-Plane2-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus-alt", title: "รถโดยสาร บขส. VIP (รอบค่ำ)", best: false, price: "THB 1,100", duration: "13 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งสายใต้ใหม่, จุดลง: สถานีขนส่งภูเก็ต 2", time: "19:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-ภูเก็ต-Bus1-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus", title: "บริษัท ภูเก็ต เซ็นทรัล - 38 ที่นั่ง", best: false, price: "THB 950", duration: "14 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งสายใต้ใหม่, จุดลง: สถานีขนส่งภูเก็ต 2", time: "17:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-ภูเก็ต-Bus2-ที่นี่" },
+                { type: "Plane", icon: "fas fa-plane", title: "Bangkok Airways (BKK) - รอบเย็น", best: false, price: "THB 2,500", duration: "1 ชม. 20 นาที", stops: "จุดจอดรถต้นทาง: สนามบินสุวรรณภูมิ, จุดลง: สนามบินภูเก็ต", time: "18:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-ภูเก็ต-Plane3-ที่นี่" },
+                { type: "TaxiCar", icon: "fas fa-car", title: "รถตู้เหมา (10 ที่นั่ง) - 2 วัน", best: false, price: "THB 25,000", duration: "12 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: รับจาก กทม., จุดลง: ส่งถึงที่พักในภูเก็ต", time: "06:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-ภูเก็ต-Taxi1-ที่นี่" },
+                { type: "Train", icon: "fas fa-train", title: "รถไฟ (หัวลำโพง-สุราษฎร์ฯ) ต่อรถบัส", best: false, price: "THB 800", duration: "15 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีหัวลำโพง, จุดลง: สถานีสุราษฎร์ฯ ต่อรถบัสไปภูเก็ต", time: "16:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-รถไฟ-กทม-ไป-สุราษฎร์ฯ-ต่อภูเก็ต-ที่นี่" },
+                { type: "Plane", icon: "fas fa-plane", title: "Nok Air (DMK) - ราคาประหยัด", best: false, price: "THB 1,450", duration: "1 ชม. 35 นาที", stops: "จุดจอดรถต้นทาง: สนามบินดอนเมือง, จุดลง: สนามบินภูเก็ต", time: "15:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-ภูเก็ต-Plane4-ที่นี่" },
+            ],
+            // ----------------------------------------------------
+            // เส้นทาง: ภูเก็ต -> กรุงเทพ (8 ตัวเลือก)
+            // ----------------------------------------------------
+            "ภูเก็ต_กรุงเทพ": [
+                { type: "Plane", icon: "fas fa-plane", title: "Thai Vietjet (HKT) - รอบเช้า", best: true, price: "THB 1,800", duration: "1 ชม. 25 นาที", stops: "จุดจอดรถต้นทาง: สนามบินภูเก็ต, จุดลง: สนามบินสุวรรณภูมิ", time: "08:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-ภูเก็ต-ไป-กทม-Plane1-ที่นี่" },
+                { type: "Plane", icon: "fas fa-plane", title: "AirAsia (HKT) - รอบเที่ยง", best: false, price: "THB 1,550", duration: "1 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: สนามบินภูเก็ต, จุดลง: สนามบินดอนเมือง", time: "13:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-ภูเก็ต-ไป-กทม-Plane2-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus-alt", title: "รถโดยสาร บขส. VIP (รอบค่ำ)", best: false, price: "THB 1,100", duration: "13 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งภูเก็ต 2, จุดลง: สถานีขนส่งสายใต้ใหม่", time: "19:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-ภูเก็ต-ไป-กทม-Bus1-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus", title: "บริษัท ภูเก็ต เซ็นทรัล - 38 ที่นั่ง", best: false, price: "THB 950", duration: "14 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งภูเก็ต 2, จุดลง: สถานีขนส่งสายใต้ใหม่", time: "17:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-ภูเก็ต-ไป-กทม-Bus2-ที่นี่" },
+                { type: "Plane", icon: "fas fa-plane", title: "Bangkok Airways (HKT) - รอบเย็น", best: false, price: "THB 2,500", duration: "1 ชม. 20 นาที", stops: "จุดจอดรถต้นทาง: สนามบินภูเก็ต, จุดลง: สนามบินสุวรรณภูมิ", time: "18:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-ภูเก็ต-ไป-กทม-Plane3-ที่นี่" },
+                { type: "TaxiCar", icon: "fas fa-car", title: "รถตู้เหมา (10 ที่นั่ง) - 2 วัน", best: false, price: "THB 25,000", duration: "12 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: รับจากที่พักในภูเก็ต, จุดลง: ส่งถึง กทม.", time: "06:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-ภูเก็ต-ไป-กทม-Taxi1-ที่นี่" },
+                { type: "Train", icon: "fas fa-train", title: "รถบัส (ภูเก็ต-สุราษฎร์ฯ) ต่อรถไฟ", best: false, price: "THB 800", duration: "15 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: สถานีขนส่งภูเก็ต 2 ต่อรถบัสไปสุราษฎร์ฯ", time: "14:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-รถบัส-ไป-สุราษฎร์ฯ-ต่อรถไฟ-ที่นี่" },
+                { type: "Plane", icon: "fas fa-plane", title: "Nok Air (HKT) - รอบค่ำ", best: false, price: "THB 1,450", duration: "1 ชม. 35 นาที", stops: "จุดจอดรถต้นทาง: สนามบินภูเก็ต, จุดลง: สนามบินดอนเมือง", time: "20:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-ภูเก็ต-ไป-กทม-Plane4-ที่นี่" },
+            ],
+            // ----------------------------------------------------
+            // เส้นทาง: กรุงเทพ -> สมุทรปราการ (8 ตัวเลือก)
+            // ----------------------------------------------------
+            "กรุงเทพ_สมุทรปราการ": [
+                { type: "Train", icon: "fas fa-train", title: "รถไฟฟ้า BTS (สายสีเขียว)", best: true, price: "THB 25–65", duration: "0 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: BTS สยาม/อโศก, จุดลง: BTS เคหะ (อ.บางพลี)", time: "07:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-สมุทรปราการ-Train1-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus-alt", title: "รถโดยสารประจำทาง (ม.46) สุวรรณภูมิ-ปากน้ำ", best: false, price: "THB 20–50", duration: "1 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: BTS อ่อนนุช, จุดลง: อิมพีเรียลสำโรง (อ.เมือง)", time: "06:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-สมุทรปราการ-Bus1-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus", title: "รถเมล์ธรรมดา (รอบเย็น) - ประหยัด", best: false, price: "THB 8–20", duration: "1 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: หัวลำโพง, จุดลง: ตลาดปากน้ำ (อ.เมือง)", time: "17:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-สมุทรปราการ-Bus3-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-shuttle-van", title: "รถตู้ ต.127 (บางนา-บางปะกง)", best: false, price: "THB 35–60", duration: "0 ชม. 40 นาที", stops: "จุดจอดรถต้นทาง: BTS บางนา, จุดลง: โลตัสบางพลี", time: "11:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-สมุทรปราการ-Bus4-ที่นี่" },
+                { type: "Train", icon: "fas fa-train", title: "รถไฟฟ้า BTS (สายสีเขียว) - รอบเย็น", best: false, price: "THB 25–65", duration: "0 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: BTS สยาม/อโศก, จุดลง: BTS เคหะ (อ.บางพลี)", time: "18:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-สมุทรปราการ-Train2-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus-alt", title: "รถโดยสารประจำทาง (ม.46) รอบดึก", best: false, price: "THB 20–50", duration: "1 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: BTS อ่อนนุช, จุดลง: อิมพีเรียลสำโรง (อ.เมือง)", time: "22:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-สมุทรปราการ-Bus6-ที่นี่" },
+                { type: "TaxiCar", icon: "fas fa-taxi", title: "แท็กซี่มิเตอร์ (ประมาณการ)", best: false, price: "THB 300–450", duration: "0 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: อโศก, จุดลง: อ.เมืองสมุทรปราการ", time: "10:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-สมุทรปราการ-Taxi1-ที่นี่" },
+                { type: "TaxiCar", icon: "fas fa-car", title: "รถตู้เหมา (ราคาคงที่)", best: false, price: "THB 500", duration: "0 ชม. 40 นาที", stops: "จุดจอดรถต้นทาง: รับจากบ้าน, จุดลง: ส่งถึงที่พัก", time: "14:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-กทม-ไป-สมุทรปราการ-Taxi2-ที่นี่" },
+            ],
+            // ----------------------------------------------------
+            // เส้นทาง: สมุทรปราการ -> กรุงเทพ (8 ตัวเลือก)
+            // ----------------------------------------------------
+            "สมุทรปราการ_กรุงเทพ": [
+                { type: "Train", icon: "fas fa-train", title: "รถไฟฟ้า BTS (สายสีเขียว) - รอบเช้า", best: true, price: "THB 25–65", duration: "0 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: BTS เคหะ (อ.บางพลี), จุดลง: BTS สยาม/อโศก", time: "06:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-สมุทรปราการ-ไป-กทม-Train1-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus-alt", title: "รถโดยสารประจำทาง (ม.46) ปากน้ำ-สุขุมวิท", best: false, price: "THB 20–50", duration: "1 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: อิมพีเรียลสำโรง (อ.เมือง), จุดลง: BTS อ่อนนุช", time: "07:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-สมุทรปราการ-ไป-กทม-Bus1-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus", title: "รถเมล์ธรรมดา (รอบเย็น) - ประหยัด", best: false, price: "THB 8–20", duration: "1 ชม. 30 นาที", stops: "จุดจอดรถต้นทาง: ตลาดปากน้ำ (อ.เมือง), จุดลง: หัวลำโพง", time: "17:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-สมุทรปราการ-ไป-กทม-Bus3-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-shuttle-van", title: "รถตู้ ต.127 (บางปะกง-บางนา)", best: false, price: "THB 35–60", duration: "0 ชม. 40 นาที", stops: "จุดจอดรถต้นทาง: โลตัสบางพลี, จุดลง: BTS บางนา", time: "09:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-สมุทรปราการ-ไป-กทม-Bus4-ที่นี่" },
+                { type: "Train", icon: "fas fa-train", title: "รถไฟฟ้า BTS (สายสีเขียว) - รอบเที่ยง", best: false, price: "THB 25–65", duration: "0 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: BTS เคหะ (อ.บางพลี), จุดลง: BTS สยาม/อโศก", time: "12:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-สมุทรปราการ-ไป-กทม-Train2-ที่นี่" },
+                { type: "BusVan", icon: "fas fa-bus-alt", title: "รถโดยสารประจำทาง (ม.46) รอบดึก", best: false, price: "THB 20–50", duration: "1 ชม. 00 นาที", stops: "จุดจอดรถต้นทาง: อิมพีเรียลสำโรง (อ.เมือง), จุดลง: BTS อ่อนนุช", time: "23:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-สมุทรปราการ-ไป-กทม-Bus6-ที่นี่" },
+                { type: "TaxiCar", icon: "fas fa-taxi", title: "แท็กซี่มิเตอร์ (ประมาณการ)", best: false, price: "THB 300–450", duration: "0 ชม. 45 นาที", stops: "จุดจอดรถต้นทาง: อ.เมืองสมุทรปราการ, จุดลง: อโศก", time: "10:30", mapUrl: "ใส่-URL-ของ-เส้นทาง-สมุทรปราการ-ไป-กทม-Taxi1-ที่นี่" },
+                { type: "TaxiCar", icon: "fas fa-car", title: "รถตู้เหมา (ราคาคงที่)", best: false, price: "THB 500", duration: "0 ชม. 40 นาที", stops: "จุดจอดรถต้นทาง: ส่งถึงที่พัก, จุดลง: รับจากบ้าน", time: "14:00", mapUrl: "ใส่-URL-ของ-เส้นทาง-สมุทรปราการ-ไป-กทม-Taxi2-ที่นี่" },
+            ],
+        };
+
+        // ฟังก์ชันช่วยในการกำหนด Icon
+        function getIconClass(type) {
+            switch(type) {
+                case 'Train': return 'fas fa-train';
+                case 'BusVan': return 'fas fa-bus-alt';
+                case 'Plane': return 'fas fa-plane';
+                case 'TaxiCar': return 'fas fa-taxi';
+                case 'Ferry': return 'fas fa-ship';
+                default: return 'fas fa-route';
+            }
+        }
+        
+        function cleanSearchKey(location) {
+            // ลบเครื่องหมายที่ไม่ต้องการและแปลงเป็น Key
+            return location.replace(/,/g, '').replace(/\s/g, '').replace(/[()]/g, '');
+        }
+
+        function renderTravelOptions(from, to, filterType = 'All') {
+            const listContainer = document.getElementById('travel-options-list');
+            
+            const cleanFrom = cleanSearchKey(from);
+            const cleanTo = cleanSearchKey(to);
+            const searchKey = `${cleanFrom}_${cleanTo}`;
+            
+            let allOptions = travelData[searchKey];
+            let isDefault = false;
+
+            if (!allOptions || allOptions.length === 0) {
+                // *** FALLBACK LOGIC (ชุดข้อมูลจำลองสำหรับจังหวัดอื่น ๆ ที่ไม่ได้ระบุไว้) ***
+                const defaultData = [ 
+                    { type: "BusVan", icon: "fas fa-bus-alt", title: `รถโดยสาร (บขส.) ${from} - ${to} (VIP) รอบดึก`, best: true, price: "THB 800–1200", duration: "7 ชม. 00 นาที", stops: `จุดจอดรถต้นทาง: สถานีขนส่ง ${from} (อ.เมือง), จุดลง: สถานีขนส่ง ${to} (อ.เมือง)`, time: "21:00", mapUrl: "ใส่-URL-Default-Bus-ที่นี่" },
+                    { type: "BusVan", icon: "fas fa-bus", title: `รถโดยสาร (บขส.) ${from} - ${to} (รอบเช้า)`, best: false, price: "THB 500–800", duration: "7 ชม. 30 นาที", stops: `จุดจอดรถต้นทาง: สถานีขนส่ง ${from} (อ.เมือง), จุดลง: สถานีขนส่ง ${to} (อ.เมือง)`, time: "08:30", mapUrl: "ใส่-URL-Default-Bus-ที่นี่" },
+                    { type: "Train", icon: "fas fa-train", title: `รถไฟด่วน (หากมีเส้นทางผ่าน)`, best: false, price: "THB 150–600", duration: "9 ชม. 30 นาที", stops: `จุดจอดรถต้นทาง: สถานีรถไฟ ${from}, จุดลง: สถานีรถไฟ ${to}`, time: "14:00", mapUrl: "ใส่-URL-Default-Train-ที่นี่" },
+                    { type: "Plane", icon: "fas fa-plane", title: `เครื่องบิน (หากมีสนามบินใน จว.) - รอบเช้า`, best: false, price: "THB 1,800–3,500", duration: "1 ชม. 15 นาที", stops: `จุดจอดรถต้นทาง: สนามบิน ${from}, จุดลง: สนามบิน ${to}`, time: "08:30", mapUrl: "ใส่-URL-Default-Plane-ที่นี่" },
+                    { type: "TaxiCar", icon: "fas fa-taxi", title: `แท็กซี่เหมา ${from} - ${to} (ราคาประมาณ)`, best: false, price: "THB 4,000–8,000", duration: "5 ชม. 00 นาที", stops: `จุดจอดรถต้นทาง: รับจากทุกจุด, จุดลง: ส่งถึงที่พัก ${to}`, time: "10:00", mapUrl: "ใส่-URL-Default-Taxi-ที่นี่" },
+                    { type: "BusVan", icon: "fas fa-bus", title: `รถตู้ (ต่อรถ) ${from} - ${to} - ประหยัด`, best: false, price: "THB 450–650", duration: "10 ชม. 00 นาที", stops: `จุดจอดรถต้นทาง: ท่ารถตู้ ${from}, จุดลง: ท่ารถตู้ ${to} (ต่อรถ)`, time: "11:30", mapUrl: "ใส่-URL-Default-Bus-ที่นี่" },
+                    { type: "Plane", icon: "fas fa-plane", title: `เครื่องบิน (หากมีสนามบินใน จว.) - รอบเย็น`, best: false, price: "THB 2,000–3,800", duration: "1 ชม. 25 นาที", stops: `จุดจอดรถต้นทาง: สนามบิน ${from}, จุดลง: สนามบิน ${to}`, time: "17:30", mapUrl: "ใส่-URL-Default-Plane-ที่นี่" },
+                    { type: "Train", icon: "fas fa-train", title: `รถไฟช้า (หากมีเส้นทางผ่าน) - ประหยัด`, best: false, price: "THB 100–300", duration: "15 ชม. 00 นาที", stops: `จุดจอดรถต้นทาง: สถานีรถไฟ ${from}, จุดลง: สถานีรถไฟ ${to}`, time: "06:00", mapUrl: "ใส่-URL-Default-Train-ที่นี่" },
+                ];
+                allOptions = defaultData;
+                isDefault = true;
+            }
+            
+            // นับจำนวนตัวเลือกทั้งหมดเพื่อแสดงใน Nav Bar
+            const counts = { All: allOptions.length, BusVan: 0, Train: 0, Plane: 0, TaxiCar: 0, Ferry: 0 };
+            allOptions.forEach(opt => {
+                if (opt.type === 'BusVan') counts.BusVan++;
+                if (opt.type === 'Train') counts.Train++;
+                if (opt.type === 'Plane') counts.Plane++;
+                if (opt.type === 'TaxiCar') counts.TaxiCar++;
+                if (opt.type === 'Ferry') counts.Ferry++;
+            });
+
+            // อัปเดตตัวเลขใน Nav Bar
+            document.getElementById('count-All').textContent = counts.All;
+            document.getElementById('count-BusVan').textContent = counts.BusVan;
+            document.getElementById('count-Train').textContent = counts.Train;
+            document.getElementById('count-Plane').textContent = counts.Plane;
+            document.getElementById('count-TaxiCar').textContent = counts.TaxiCar;
+            document.getElementById('count-Ferry').textContent = counts.Ferry;
+
+            // กรองผลลัพธ์ตามหมวดหมู่ที่เลือก
+            const filteredOptions = allOptions.filter(option => 
+                filterType === 'All' || option.type === filterType
+            );
+
+            listContainer.innerHTML = ''; 
+
+            if (filteredOptions.length === 0) {
+                listContainer.innerHTML = `<p style="text-align: center; color: #FF6B35; font-weight: 600;">ไม่พบข้อมูลเส้นทางขนส่งสาธารณะโดยตรงสำหรับหมวดหมู่ที่เลือก</p>`;
+                document.getElementById('results-heading').textContent = `ตัวเลือกทั้งหมด ${counts.All} รายการ: จาก ${from} ไป ${to} (แสดง 0 รายการ)`;
+                return;
+            }
+
+            let htmlContent = '';
+            if (isDefault) {
+                 htmlContent += `<p style="color: #38A3A5; font-size: 0.9em; margin-bottom: 15px; padding: 10px; border: 1px dashed #38A3A5;">
+                                <i class="fas fa-info-circle"></i> แสดงผลลัพธ์โดยใช้ข้อมูลจำลองทั่วไปสำหรับเส้นทางนี้ (รายละเอียดอำเภอ/เขต อาจไม่ตรง)
+                            </p>`;
+            }
+            
+            filteredOptions.forEach((option) => {
+                const isBest = option.best ? ' best-option' : '';
+                const bestTag = option.best ? '<span class="best-tag">BEST</span>' : '';
+                const iconClass = option.icon || getIconClass(option.type);
+                
+                // *** NEW: ส่ง mapUrl และ 'this' เข้าไปใน onclick ***
+                const encodedMapUrl = encodeURIComponent(option.mapUrl);
+                
+                htmlContent += `
+                    <div class="travel-option${isBest}" 
+                         onclick="updateMapForOption(decodeURIComponent('${encodedMapUrl}'), this)"> 
+                        <div class="option-header">
+                            <i class="${iconClass}"></i>
+                            <span>${option.title}</span>
+                            <span class="departure-time">ออก: ${option.time}</span>  
+                            ${bestTag}
+                        </div>
+                        <div class="option-details">
+                            <span class="price">${option.price}</span>
+                            <span class="duration">
+                                <i class="far fa-clock"></i> ${option.duration}
+                            </span>
+                        </div>
+                        <p class="details-text">
+                            <i class="fas fa-map-pin"></i> ${option.stops}
+                        </p>
+                    </div>
+                `;
+            });
+
+            listContainer.innerHTML = htmlContent;
+            document.getElementById('results-heading').textContent = `ตัวเลือกทั้งหมด ${counts.All} รายการ: จาก ${from} ไป ${to} (แสดง ${filteredOptions.length} รายการ)`;
+        }
+
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const urlParams = new URLSearchParams(window.location.search);
+            let fromLocation = urlParams.get('from') || 'กรุงเทพ';
+            let toLocation = urlParams.get('to') || 'พัทยา'; // กำหนดค่าเริ่มต้นเป็น พัทยา
+            
+            fromLocation = urlParams.get('from') ? fromLocation.replace(/\+/g, ' ') : fromLocation;
+            toLocation = urlParams.get('to') ? toLocation.replace(/\+/g, ' ') : toLocation;
+
+            // 1. อัปเดตช่องค้นหาใน Header
+            document.getElementById('from-input-compact').value = fromLocation;
+            document.getElementById('to-input-compact').value = toLocation;
+            
+            // 2. แสดงผลลัพธ์เริ่มต้น
+            renderTravelOptions(fromLocation, toLocation, 'All');
+
+            // ** 3. ตั้งค่าแผนที่เริ่มต้น (General Map - แสดงภาพรวม) **
+            const mapIframe = document.getElementById('google-map-iframe');
+            if (mapIframe) {
+                const encodedOrigin = encodeURIComponent(fromLocation);
+                const encodedDestination = encodeURIComponent(toLocation);
+                
+                // URL สำหรับแสดงภาพรวมของสองเมือง
+                mapIframe.src = `https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d387532.7811986566!2d100.518602!3d13.7563!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m13!3e3!4m5!1s0x30e29b19d5a73e6b%3A0x6a0a09e0a2b8e39d!2sMo%20Chit%202%20Bus%20Terminal!3m2!1d13.813861!2d100.549678!4m5!1s0x30da3a79d9e4a317%3A0x8a9e10f6e5e8e8f!2z4Lir4Lit4Lij4Lix4Lia4Lio4Liy4LiZ4Liy4LiZ4Liq4Liy4Lir4LiB4Liy4Lij!3m2!1d18.80345!2d99.0146!5e0!3m2!1sth!2sth!4v1628172819875!5m2!1sth!2sth{encodedOrigin}+to+${encodedDestination}&hl=th&z=6&ie=UTF8&output=embed`;
+            }
+
+
+            // 4. เพิ่ม Listener สำหรับ Nav Bar ด้านซ้าย
+            document.querySelectorAll('.filter-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active-filter'));
+                    this.classList.add('active-filter');
+                    const filterType = this.getAttribute('data-filter');
+                    renderTravelOptions(fromLocation, toLocation, filterType);
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>

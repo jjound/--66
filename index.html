@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jetsadaorn Intso - Portfolio/Service</title>
+  <link rel="stylesheet" href="index.css">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-brand">TripNOcar</div>
+    <div class="nav-menu">
+      <a href="#home">home</a>
+      <a href="#services">บริการ</a> 
+      <a href="#trailer-section">trailer</a>
+      <a href="#video-background">video</a>
+      <a href="#about-section">เกี่ยวกับ</a>  
+      <a href="#team-section">ทีมงาน</a>  
+      <a href="#contact-section">ติดต่อเรา</a> 
+    </div>
+  </nav>
+
+  <div id="home" class="carousel-container">
+    <div class="carousel-slide-wrapper">
+      <img src="https://cdn.pixabay.com/photo/2023/11/01/11/12/hallstatt-8357170_1280.jpg" alt="Slide 1 (Hallstatt)" class="carousel-slide"> 
+      <img src="https://cdn.pixabay.com/photo/2023/03/22/19/24/nature-7870374_1280.jpg" alt="Slide 2 (Mountain Pass)" class="carousel-slide">
+      <img src="https://cdn.pixabay.com/photo/2022/01/13/00/09/austria-6934186_1280.jpg" alt="Slide 3 (Snowy Peak)" class="carousel-slide">
+      <img src="https://cdn.pixabay.com/photo/2018/09/28/07/19/thailand-3708666_1280.jpg" alt="Slide 4 (Air)" class="carousel-slide">
+      <img src="https://cdn.pixabay.com/photo/2020/05/25/17/03/merry-christmas-5219496_1280.jpg" alt="Slide 5 (GG)" class="carousel-slide">
+      <img src="https://cdn.pixabay.com/photo/2016/11/14/02/51/rice-plantation-1822444_960_720.jpg" alt="Slide 6 (thai)" class="carousel-slide">
+    </div>
+
+    <div class="hero-main-text">
+        <h1>ค้นหาทุกเส้นทาง... แม้ไม่มีรถส่วนตัว</h1>
+        <p>เปรียบเทียบราคาและเส้นทางโดย เครื่องบิน รถไฟ รถบัส เรือเฟอร์รี่ และอื่น ๆ</p>
+    </div>
+
+    <div class="rome2rio-search-box">
+        <h2 class="search-box-title">ค้นหาเส้นทางการเดินทาง</h2>
+        <form action="Search.html" method="GET"> 
+            
+            <div class="search-field-group" id="from-search-group">
+                <label for="travel-from">จุดเริ่มต้น (TRAVEL FROM)</label>
+                <input type="text" id="travel-from" name="from" placeholder="กรอกชื่อจังหวัด/อำเภอ" value="กรุงเทพ" required>
+                <div class="suggestion-dropdown" id="from-suggestions">
+                    <div class="suggestion-item" data-value="กรุงเทพ"><i class="fas fa-map-marker-alt"></i> กรุงเทพมหานคร</div>
+                    <div class="suggestion-item" data-value="เชียงใหม่"><i class="fas fa-map-marker-alt"></i> เชียงใหม่</div>
+                    <div class="suggestion-item" data-value="ภูเก็ต"><i class="fas fa-map-marker-alt"></i> ภูเก็ต</div>
+                    <div class="suggestion-item" data-value="พัทยา"><i class="fas fa-map-marker-alt"></i> พัทยา (ชลบุรี)</div>
+                    <div class="suggestion-item" data-value="สมุทรปราการ"><i class="fas fa-map-marker-alt"></i> สมุทรปราการ</div>
+                    <div class="suggestion-item" data-value="อยุธยา"><i class="fas fa-map-marker-alt"></i> อยุธยา</div>
+                    <div class="suggestion-item" data-value="ขอนแก่น"><i class="fas fa-map-marker-alt"></i> ขอนแก่น</div>
+                    <div class="suggestion-item" data-value="กระบี่"><i class="fas fa-map-marker-alt"></i> กระบี่</div>
+                    <div class="suggestion-item" data-value="สงขลา"><i class="fas fa-map-marker-alt"></i> สงขลา</div>
+                    <div class="suggestion-item" data-value="นครราชสีมา"><i class="fas fa-map-marker-alt"></i> นครราชสีมา</div>
+                    <div class="suggestion-item" data-value="อุดรธานี"><i class="fas fa-map-marker-alt"></i> อุดรธานี</div>
+                    <div class="suggestion-item" data-value="สุราษฎร์ธานี"><i class="fas fa-map-marker-alt"></i> สุราษฎร์ธานี</div>
+                    <div class="suggestion-item" data-value="ปทุมธานี"><i class="fas fa-map-marker-alt"></i> ปทุมธานี</div>
+                    <div class="suggestion-item" data-value="นนทบุรี"><i class="fas fa-map-marker-alt"></i> นนทบุรี</div>
+                    <div class="suggestion-item" data-value="สมุทรสาคร"><i class="fas fa-map-marker-alt"></i> สมุทรสาคร</div>
+                    <div class="suggestion-item" data-value="เชียงราย"><i class="fas fa-map-marker-alt"></i> เชียงราย</div>
+                    <div class="suggestion-item" data-value="ลำปาง"><i class="fas fa-map-marker-alt"></i> ลำปาง</div>
+                    <div class="suggestion-item" data-value="ลำพูน"><i class="fas fa-map-marker-alt"></i> ลำพูน</div>
+                    <div class="suggestion-item" data-value="แม่ฮ่องสอน"><i class="fas fa-map-marker-alt"></i> แม่ฮ่องสอน</div>
+                    <div class="suggestion-item" data-value="เพชรบูรณ์"><i class="fas fa-map-marker-alt"></i> เพชรบูรณ์</div>
+                    <div class="suggestion-item" data-value="นครพนม"><i class="fas fa-map-marker-alt"></i> นครพนม</div>
+                    <div class="suggestion-item" data-value="บุรีรัมย์"><i class="fas fa-map-marker-alt"></i> บุรีรัมย์</div>
+                    <div class="suggestion-item" data-value="นครศรีธรรมราช"><i class="fas fa-map-marker-alt"></i> นครศรีธรรมราช</div>
+                    <div class="suggestion-item" data-value="ตรัง"><i class="fas fa-map-marker-alt"></i> ตรัง</div>
+                    <div class="suggestion-item" data-value="ยะลา"><i class="fas fa-map-marker-alt"></i> ยะลา</div>
+                    <div class="suggestion-item" data-value="อุบลราชธานี"><i class="fas fa-map-marker-alt"></i> อุบลราชธานี</div>
+                    <div class="suggestion-item" data-value="สุรินทร์"><i class="fas fa-map-marker-alt"></i> สุรินทร์</div>
+                    <div class="suggestion-item" data-value="สระบุรี"><i class="fas fa-map-marker-alt"></i> สระบุรี</div>
+                    <div class="suggestion-item" data-value="ประจวบคีรีขันธ์"><i class="fas fa-map-marker-alt"></i> ประจวบคีรีขันธ์</div>
+                    <div class="suggestion-item" data-value="สุพรรณบุรี"><i class="fas fa-map-marker-alt"></i> สุพรรณบุรี</div>
+                    <div class="suggestion-item" data-value="เพชรบุรี"><i class="fas fa-map-marker-alt"></i> เพชรบุรี</div>
+                </div>
+            </div>
+            
+            <div class="search-field-group">
+                <label for="travel-to">จุดหมายปลายทาง (TO)</label>
+                <input type="text" id="travel-to" name="to" placeholder="กรอกชื่อจังหวัด/อำเภอ" value="เชียงใหม่" required>
+                <div class="swap-button" onclick="swapLocations()">
+                    <i class="fas fa-arrow-up"></i><i class="fas fa-arrow-down"></i>
+                </div>
+                <div class="suggestion-dropdown" id="to-suggestions">
+                    <div class="suggestion-item" data-value="กรุงเทพ"><i class="fas fa-map-marker-alt"></i> กรุงเทพมหานคร</div>
+                    <div class="suggestion-item" data-value="เชียงใหม่"><i class="fas fa-map-marker-alt"></i> เชียงใหม่</div>
+                    <div class="suggestion-item" data-value="ภูเก็ต"><i class="fas fa-map-marker-alt"></i> ภูเก็ต</div>
+                    <div class="suggestion-item" data-value="พัทยา"><i class="fas fa-map-marker-alt"></i> พัทยา (ชลบุรี)</div>
+                    <div class="suggestion-item" data-value="สมุทรปราการ"><i class="fas fa-map-marker-alt"></i> สมุทรปราการ</div>
+                    <div class="suggestion-item" data-value="อยุธยา"><i class="fas fa-map-marker-alt"></i> อยุธยา</div>
+                    <div class="suggestion-item" data-value="ขอนแก่น"><i class="fas fa-map-marker-alt"></i> ขอนแก่น</div>
+                    <div class="suggestion-item" data-value="กระบี่"><i class="fas fa-map-marker-alt"></i> กระบี่</div>
+                    <div class="suggestion-item" data-value="สงขลา"><i class="fas fa-map-marker-alt"></i> สงขลา</div>
+                    <div class="suggestion-item" data-value="นครราชสีมา"><i class="fas fa-map-marker-alt"></i> นครราชสีมา</div>
+                    <div class="suggestion-item" data-value="อุดรธานี"><i class="fas fa-map-marker-alt"></i> อุดรธานี</div>
+                    <div class="suggestion-item" data-value="สุราษฎร์ธานี"><i class="fas fa-map-marker-alt"></i> สุราษฎร์ธานี</div>
+                    <div class="suggestion-item" data-value="ปทุมธานี"><i class="fas fa-map-marker-alt"></i> ปทุมธานี</div>
+                    <div class="suggestion-item" data-value="นนทบุรี"><i class="fas fa-map-marker-alt"></i> นนทบุรี</div>
+                    <div class="suggestion-item" data-value="สมุทรสาคร"><i class="fas fa-map-marker-alt"></i> สมุทรสาคร</div>
+                    <div class="suggestion-item" data-value="เชียงราย"><i class="fas fa-map-marker-alt"></i> เชียงราย</div>
+                    <div class="suggestion-item" data-value="ลำปาง"><i class="fas fa-map-marker-alt"></i> ลำปาง</div>
+                    <div class="suggestion-item" data-value="ลำพูน"><i class="fas fa-map-marker-alt"></i> ลำพูน</div>
+                    <div class="suggestion-item" data-value="แม่ฮ่องสอน"><i class="fas fa-map-marker-alt"></i> แม่ฮ่องสอน</div>
+                    <div class="suggestion-item" data-value="เพชรบูรณ์"><i class="fas fa-map-marker-alt"></i> เพชรบูรณ์</div>
+                    <div class="suggestion-item" data-value="นครพนม"><i class="fas fa-map-marker-alt"></i> นครพนม</div>
+                    <div class="suggestion-item" data-value="บุรีรัมย์"><i class="fas fa-map-marker-alt"></i> บุรีรัมย์</div>
+                    <div class="suggestion-item" data-value="นครศรีธรรมราช"><i class="fas fa-map-marker-alt"></i> นครศรีธรรมราช</div>
+                    <div class="suggestion-item" data-value="ตรัง"><i class="fas fa-map-marker-alt"></i> ตรัง</div>
+                    <div class="suggestion-item" data-value="ยะลา"><i class="fas fa-map-marker-alt"></i> ยะลา</div>
+                    <div class="suggestion-item" data-value="อุบลราชธานี"><i class="fas fa-map-marker-alt"></i> อุบลราชธานี</div>
+                    <div class="suggestion-item" data-value="สุรินทร์"><i class="fas fa-map-marker-alt"></i> สุรินทร์</div>
+                    <div class="suggestion-item" data-value="สระบุรี"><i class="fas fa-map-marker-alt"></i> สระบุรี</div>
+                    <div class="suggestion-item" data-value="ประจวบคีรีขันธ์"><i class="fas fa-map-marker-alt"></i> ประจวบคีรีขันธ์</div>
+                    <div class="suggestion-item" data-value="สุพรรณบุรี"><i class="fas fa-map-marker-alt"></i> สุพรรณบุรี</div>
+                    <div class="suggestion-item" data-value="เพชรบุรี"><i class="fas fa-map-marker-alt"></i> เพชรบุรี</div>
+                </div>
+            </div>
+
+            <button type="submit" class="rome2rio-submit-button">
+                <i class="fas fa-search"></i> ค้นหาทุกเส้นทาง (All Options)
+            </button>
+            
+            </form>
+    </div>
+
+    <div class="carousel-text">
+        <span>Austria</span>
+    </div>
+
+    <button class="prev" onclick="plusSlides(-1)"><i class="fas fa-chevron-left"></i></button>
+    <button class="next" onclick="plusSlides(1)"><i class="fas fa-chevron-right"></i></button>
+  </div>
+
+  <div id="services" class="content-section">
+    <h2 class="section-title">บริการของเรา</h2>
+    <div class="content-wrapper">
+      <div class="column-box">
+        <h3 class="column-title">การวางแผนเส้นทางเชื่อมต่อ</h3>
+        <p>เราเชี่ยวชาญในการออกแบบเส้นทางที่ใช้ระบบขนส่งสาธารณะเป็นหลัก ไม่ว่าจุดหมายของคุณจะห่างไกลแค่ไหน การไม่มีรถส่วนตัวจะไม่ใช่อุปสรรคอีกต่อไป เราสร้างแผนการเดินทางที่เชื่อมต่อระหว่าง เครื่องบิน รถไฟ รถบัส และ เรือเฟอร์รี่ ได้อย่างลงตัวที่สุด ตั้งแต่การออกจากบ้านจนถึงปลายทาง พร้อมแนะนำตั๋วโดยสารร่วมและการจองที่นั่งที่คุ้มค่าที่สุด </p>
+      </div>
+      <div class="column-box">
+        <h3 class="column-title">คู่มือเดินทางและเคล็ดลับเฉพาะทาง</h3>
+        <p>รวบรวมข้อมูลและเคล็ดลับเฉพาะสำหรับผู้ที่เดินทางโดยไม่ขับรถเอง! เราเจาะลึกวิธีการเดินทางในพื้นที่ท่องเที่ยว การใช้งาน รถราง (Trams) รถไฟฟ้าใต้ดิน (Subway) และรถโดยสารสาธารณะในเมืองใหญ่ทั่วโลก พร้อมคู่มือการเดินทางจากสนามบินสู่เมือง รวมถึงวิธีการใช้บริการ รถเช่ารายวัน (Car Rental) หรือ รถร่วมเดินทาง (Ride-Sharing) ในพื้นที่ที่เข้าถึงยาก เพื่อให้คุณเดินทางได้สะดวกและประหยัดที่สุด</p>
+      </div>
+      <div class="column-box">
+        <h3 class="column-title">ออกแบบทริปตามความสนใจ (Customize)</h3>
+        <p>ให้การเดินทางของคุณสะท้อนความสนใจอย่างแท้จริง ทีมงานของเราช่วยคุณสร้างสรรค์ทริปตามธีมที่คุณต้องการ ไม่ว่าจะเป็นทริป ตะลุยกินอาหารท้องถิ่น, ตามรอยสถานที่ถ่ายทำภาพยนตร์, หรือ สำรวจธรรมชาติแบบยั่งยืน เราจะช่วยกำหนดตารางเวลาและจองที่พักที่เข้าถึงได้ง่ายด้วยขนส่งสาธารณะ เพื่อให้คุณได้รับประสบการณ์ที่ลึกซึ้งและน่าประทับใจ โดยคุณสามารถเลือกรับบริการเป็นภาษาไทยและอังกฤษได้</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="trailer-section" class="trailer-standalone-section">
+    <h2 class="section-title">Trailer ตัวอย่าง</h2>
+    <div class="trailer-box">
+      <iframe 
+        width="100%" 
+        height="500px" 
+        src="https://www.youtube.com/embed/6m8TVnHJPdo?autoplay=1&mute=1&controls=1" 
+        frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        allowfullscreen 
+        class="trailer-video-main"
+      ></iframe>
+    </div>
+  </div>
+
+  <div id="video-background" class="video-footer-section">
+  <iframe 
+    width="100%" 
+    height="500px" 
+    src="https://www.youtube.com/embed/6m8TVnHJPdo?controls=1&autoplay=1&mute=1" 
+    frameborder="0" 
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+    allowfullscreen 
+    class="video-footer"
+  ></iframe>
+</div>
+  
+  <div id="about-section" class="content-section about-style">
+    <h2 class="section-title">เกี่ยวกับเรา</h2>
+    <div class="about-content-wrapper">
+      <div class="about-text-box">
+        <p>ยินดีต้อนรับสู่โลกแห่งการเดินทางที่ไร้ขีดจำกัด! เราคือทีมงาน **"TripNOcar"** ผู้เชี่ยวชาญด้านการวางแผนท่องเที่ยวที่เน้นการใช้ระบบขนส่งสาธารณะ เรามีประสบการณ์ในการเดินทางมากกว่า 5 ปี ในภูมิภาคยุโรปกลาง และหลายจุดหมายปลายทางทั่วโลก เราหลงใหลในวัฒนธรรม ภูมิประเทศที่งดงาม และเชื่อว่า "การเดินทางที่ดี ไม่จำเป็นต้องมีรถส่วนตัว"</p>
+        <p>ภารกิจหลักของเราคือการช่วยให้คุณสร้างสรรค์ทริปในฝัน ไม่ว่าจะเป็นการเดินทางตามรอยสถานที่สำคัญทางประวัติศาสตร์ในเวียนนา หรือการเดินทางด้วย รถไฟชมทิวทัศน์ ทั่วเทือกเขาแอลป์</p>
+        <p>เรา เข้าใจความท้าทายของผู้ที่ไม่มีรถยนต์ จึงมุ่งมั่นมอบประสบการณ์การเดินทางที่ไม่เหมือนใคร ผ่านบริการที่เป็นกันเอง และใส่ใจในทุกรายละเอียดของ ตารางเดินรถ การเชื่อมต่อ และการเข้าถึงสถานที่ เพื่อให้คุณไปถึงจุดหมายได้อย่างง่ายดายและอิสระ</p>
+        <a href="#contact-section" class="action-button">ร่วมเดินทางไปกับเรา</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="team-section" class="content-section team-style">
+    <h2 class="section-title">ทีมงานของเรา</h2>
+    <div class="team-tabs">
+        <div class="team-tab-menu">
+            <button class="tab-button active" onclick="openTab(event, 'Zanka')">Zanka Nijiku</button>
+            <button class="tab-button" onclick="openTab(event, 'Enjin')">Rudo Surebrec</button>
+            <button class="tab-button" onclick="openTab(event, 'Rudo')">Enjin</button>
+        </div>
+
+        <div id="Zanka" class="tab-content team-content-box" style="display: block;">
+            <div class="team-header">
+                <h3>Zanka Nijiku - ผู้เชี่ยวชาญด้านวัฒนธรรมการเดินทาง</h3>
+                <p class="update-info">อัพเดท 2568</p>
+            </div>
+            <img src="https://img.freepik.com/free-photo/business-communication-ideas-concept-with-asian-attractive-male-white-shirt-hand-hold-laptop-smile-happiness-hand-gesture-pose-joyful-moment_609648-1301.jpg?semt=ais_hybrid&w=740&q=80" alt="Zanka Nijiku" class="team-photo">
+            <p class="team-description">Zanka Nijiku เป็นผู้ที่หลงใหลในกการเดินทางและประวัติศาสตร์ เธอสามารถจัดหาตั๋วเดินทางที่ดีที่สุดในเวียนนา และนำเสนอทัวร์ชมเมืองที่เจาะลึกเรื่องราวของ Mozart และ Strauss อย่างละเอียด</p>
+            <a href="#contact-section" class="action-button-small">ติดต่อ Zanka Nijiku</a>
+        </div>
+
+        <div id="Enjin" class="tab-content team-content-box">
+            <div class="team-header">
+                <h3>Rudo Surebrec - ผู้เชี่ยวชาญเส้นทางเดินป่า</h3>
+                <p class="update-info">อัพเดท 2568</p>
+            </div>
+            <img src="https://img.freepik.com/free-photo/smiling-businesswoman-office_1098-21068.jpg" alt="Enjin" class="team-photo"> 
+            <p class="team-description">Rudo Surebrec คือผู้นำทัวร์ผจญภัยในเทือกเขาแอลป์ เขามีความรู้เชิงลึกเกี่ยวกับเส้นทางเดินป่าที่สวยงามและปลอดภัยที่สุดในซาลซ์บูร์กและไทโรล (Tyrol) ประสบการณ์ 10 ปีของเขาจะทำให้การเดินทางของคุณน่าตื่นเต้นและเต็มไปด้วยความท้าทาย</p>
+            <a href="#contact-section" class="action-button-small">ติดต่อ Rudo Surebrec</a>
+        </div>
+
+        <div id="Rudo" class="tab-content team-content-box">
+            <div class="team-header">
+                <h3>Enjin - นักวางแผนทริปหรูหรา</h3>
+                <p class="update-info">อัพเดท 2568</p>
+            </div>
+            <img src="https://img.freepik.com/premium-photo/happy-asian-businesswoman-works-her-laptop-her-desk-office-smiling-camera_67155-54401.jpg" alt="Rudo Surebrec" class="team-photo">
+            <p class="team-description">Enjin เชี่ยวชาญในการจัดทริปแบบ Exclusive ตั้งแต่การจองห้องสวีทในเวียนนา ไปจนถึงการจัดรถเช่าพร้อมคนขับส่วนตัว เขารับประกันว่าการพักผ่อนของคุณจะเป็นไปอย่างสะดวกสบายและหรูหราที่สุด</p>
+            <a href="#contact-section" class="action-button-small">ติดต่อ Enjin</a>
+        </div>
+    </div>
+  </div>
+
+  <div id="contact-section" class="content-section">
+    <h2 class="section-title">ติดต่อเรา</h2>
+    <div class="contact-form-container">
+      <form action="#" method="POST" class="contact-form">
+        <div class="form-group">
+          <label for="name">ชื่อ:</label>
+          <input type="text" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+          <label for="email">อีเมล:</label>
+          <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+          <label for="subject">หัวข้อ:</label>
+          <input type="text" id="subject" name="subject">
+        </div>
+        <div class="form-group">
+          <label for="message">ข้อความ:</label>
+          <textarea id="message" name="message" rows="5" required></textarea>
+        </div>
+        <button type="submit" class="submit-button">ส่งข้อความ</button>
+      </form>
+    </div>
+  </div>
+  
+  <footer class="footer-bar">
+    <p>© jetsadaporn@2025</p>
+  </footer>
+
+  <script>
+    // ** ฟังก์ชัน Swap สำหรับหน้าแรก **
+    function swapLocations() {
+        const fromInput = document.getElementById('travel-from');
+        const toInput = document.getElementById('travel-to');
+        const tempValue = fromInput.value;
+        fromInput.value = toInput.value;
+        toInput.value = tempValue;
+    }
+
+    // ** ฟังก์ชันสำหรับจัดการ Dropdown Suggestions **
+    document.addEventListener('DOMContentLoaded', () => {
+        const fromInput = document.getElementById('travel-from');
+        const toInput = document.getElementById('travel-to');
+        const fromDropdown = document.getElementById('from-suggestions');
+        const toDropdown = document.getElementById('to-suggestions');
+
+        // 1. ฟังก์ชันแสดง/ซ่อน Dropdown เมื่อคลิกที่ Input
+        function setupDropdown(input, dropdown) {
+            input.addEventListener('focus', () => {
+                // ซ่อน Dropdown ของอีกฝั่งเสมอเมื่อมี Input ถูกโฟกัส
+                if (input.id === 'travel-from') {
+                    toDropdown.style.display = 'none';
+                } else {
+                    fromDropdown.style.display = 'none';
+                }
+                dropdown.style.display = 'block';
+            });
+
+            // 2. ฟังก์ชันซ่อน Dropdown เมื่อคลิกนอกพื้นที่
+            document.addEventListener('click', (e) => {
+                const isInsideDropdown = dropdown.contains(e.target);
+                const isSwapButton = e.target.closest('.swap-button');
+                
+                // ตรวจสอบว่าคลิกที่ input ตัวอื่นหรือนอกพื้นที่
+                if (e.target !== input && !isInsideDropdown && !isSwapButton) {
+                    dropdown.style.display = 'none';
+                }
+            });
+
+            // 3. ฟังก์ชันจัดการการคลิกที่ตัวเลือก
+            dropdown.querySelectorAll('.suggestion-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    input.value = item.getAttribute('data-value');
+                    dropdown.style.display = 'none';
+                });
+            });
+
+            // 4. ฟังก์ชันกรองรายการ (Filtering)
+            input.addEventListener('keyup', () => {
+                const filter = input.value.toUpperCase();
+                dropdown.querySelectorAll('.suggestion-item').forEach(item => {
+                    const textValue = item.textContent || item.innerText;
+                    if (textValue.toUpperCase().indexOf(filter) > -1) {
+                        item.style.display = "flex"; // แสดงผลเป็น flex
+                    } else {
+                        item.style.display = "none";
+                    }
+                });
+            });
+        }
+
+        setupDropdown(fromInput, fromDropdown);
+        setupDropdown(toInput, toDropdown);
+    });
+
+
+    let slideIndex = 1;
+    const slides = document.getElementsByClassName("carousel-slide");
+    const wrapper = document.querySelector(".carousel-slide-wrapper");
+    const numSlides = slides.length;
+    
+    function showSlides(n) {
+      if (n > numSlides) {slideIndex = 1}    
+      if (n < 1) {slideIndex = numSlides}
+
+      const slidePercentage = 100 / numSlides; 
+      const newTransformValue = (slideIndex - 1) * slidePercentage;
+
+      wrapper.style.transform = `translateX(-${newTransformValue}%)`;
+      
+      // อัพเดทข้อความใน carousel-text (ถ้ามี)
+      const currentSlide = slides[slideIndex - 1];
+      const slideAltText = currentSlide.getAttribute('alt');
+      const carouselTextElement = document.querySelector('.carousel-text span');
+      if (carouselTextElement) {
+        // ใช้ข้อความหลักจาก Alt หรือใช้ 'Austria' เป็นค่า Default
+        carouselTextElement.textContent = slideAltText ? slideAltText.split('(')[1].split(')')[0] : 'Austria';
+      }
+    }
+
+    function plusSlides(n) {
+      showSlides(slideIndex += n);
+    }
+    
+    showSlides(slideIndex);
+
+    // ********************************************
+    // *** ฟังก์ชัน Auto Slide (3 วินาที) สำหรับ Home Carousel ***
+    // ********************************************
+    function autoSlide() {
+      plusSlides(1); // เลื่อนไปภาพถัดไป 1 ภาพ
+    }
+
+    // กำหนดให้เรียกใช้ autoSlide() ทุกๆ 3000 มิลลิวินาที (3 วินาที)
+    setInterval(autoSlide, 3000); 
+
+    // ************* JavaScript สำหรับ Tab Menu *************
+    function openTab(evt, tabName) {
+      var i, tabcontent, tablinks;
+      
+      tabcontent = document.getElementsByClassName("tab-content");
+      for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+      }
+      
+      tablinks = document.getElementsByClassName("tab-button");
+      for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+      }
+      
+      document.getElementById(tabName).style.display = "block";
+      evt.currentTarget.className += " active";
+    }
+  </script>
+
+</body>
+</html>
